@@ -1,5 +1,6 @@
 bin/
 gen/
+out/
 proguard/
 .DS_Store
 project.properties
