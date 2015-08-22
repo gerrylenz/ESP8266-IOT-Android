@@ -1,0 +1,29 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:custom="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context="com.javacodegeeks.android.menu.MainActivity">
+
+    <item
+        android:id="@+id/action_main"
+        android:icon="@drawable/ic_action_settings"
+        android:orderInCategory="100"
+        android:title="Home"
+        android:showAsAction="never">
+    </item>
+    <item
+        android:id="@+id/action_link"
+        android:orderInCategory="100"
+        android:title="Link"
+        android:showAsAction="never">
+    </item>
+    <item
+        android:id="@+id/action_setup"
+        android:orderInCategory="100"
+        android:title="Settings"
+        android:showAsAction="never">
+    </item>
+
+    <!-- android:showAsAction="always" -->
+
+</menu>
