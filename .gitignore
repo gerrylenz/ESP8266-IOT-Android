@@ -2,5 +2,6 @@ bin/
 gen/
 out/
 proguard/
+out/
 .DS_Store
 project.properties
