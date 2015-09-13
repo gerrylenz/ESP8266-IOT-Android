@@ -29,6 +29,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.espressif.esp8266_iot.DataStore.DataStore_Data;
@@ -54,6 +55,16 @@ import java.util.List;
 import static java.net.InetAddress.*;
 
 public class mainActivity extends BaseActivity implements OnClickListener {
+
+    public static final int HELLO = 0;
+    public static final int STATUS = 1;
+    public static final int RESET = 2;
+    public static final int RELAY = 3;
+    public static final int MQTT_CONFIG = 4;
+    public static final int UMWELT = 5;
+    public static final int UPGRADE = 6;
+    public static final int TEXT = 7;
+
 
     public static final String PREFS_NAME = "MyPrefsFile";
     static final String TAG = "mainActivity";
@@ -254,6 +265,48 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                         Log.e(TAG, "onLongClick ID:" + v.getId());
                         Vibrator vib = (Vibrator) getSystemService(context.VIBRATOR_SERVICE);
                         vib.vibrate(1000);
+
+                        final TextView tv = (TextView) v.findViewById(v.getId());
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+                        builder.setTitle("Bitte wählen");
+                        builder.setItems(new CharSequence[]
+                                        {"Löschen", "Upgrade", "Abbruch"},
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        DatabaseHandler_Name db_name = new DatabaseHandler_Name(context);
+                                        DatabaseHandler_Data db_data = new DatabaseHandler_Data(context);
+                                        int i = tv.getId() / TEXTVIEWS;
+                                        switch (which) {
+                                            case 0:
+                                                if (db_name.IsDataInDB(i)) {
+                                                    db_name.deleteDataStore(new DataStore_Name(i));
+                                                }
+                                                if (db_data.IsDataInDB(i)) {
+                                                    db_data.deleteDataStore(new DataStore_Data(i));
+                                                }
+                                                break;
+                                            case 1:
+                                                if (db_data != null) {
+
+                                                    DataStore_Data cx = db_data.getData(i);
+                                                    Log.d(TAG, "Send UDP to :" + cx.getAddress());
+
+                                                    if (cx != null) {
+                                                            new MyThread(cx.getAddress() + ":" + UPGRADE ).start();
+                                                        }
+                                                    }
+                                                Toast.makeText(context, "clicked 2", 0).show();
+                                                break;
+                                            case 2:
+                                                Toast.makeText(context, "Abbruch", 0).show();
+                                                break;
+                                        }
+                                    }
+                                });
+                        builder.create().show();
+                        /*
                         LayoutInflater li = LayoutInflater.from(context);
                         View promptsView = li.inflate(R.layout.delete_station, null);
                         final TextView tv = (TextView) v.findViewById(v.getId());
@@ -291,6 +344,7 @@ public class mainActivity extends BaseActivity implements OnClickListener {
 
                         // show it
                         alertDialog.show();
+                        */
 
                         return true;
                     }
@@ -619,12 +673,14 @@ public class mainActivity extends BaseActivity implements OnClickListener {
 //http://stackoverflow.com/questions/16752205/simple-udp-server-for-android-and-get-multi-messages
     private class MyDatagramReceiver extends Thread {
         private boolean bKeepRunning = true;
+        private int lastBefehl = 0;
         private String lastMessage = "";
         private String lastIP = "";
-        private String lastFunction = "";
+        public String lastFunction = "";
         private String lastPinIO = "";
         private String lastTemp = "";
         private String lastHumi = "";
+        private String lastMsg = "";
         private int lastID = 0;
         private Boolean checked = false;
         DatagramSocket socket;
@@ -635,12 +691,7 @@ public class mainActivity extends BaseActivity implements OnClickListener {
         public void run() {
             Log.i(TAG, "MyDatagramReceiver gestartet");
 
-            final int HELLO = 0;
-            final int STATUS = 1;
-            final int RESET = 2;
-            final int RELAY = 3;
-            final int MQTT_CONFIG = 4;
-            final int UMWELT = 5;
+
             final int AN = 1;
             final int AUS = 0;
 
@@ -648,6 +699,7 @@ public class mainActivity extends BaseActivity implements OnClickListener {
             final int Befehl = 1;
             final int LocaleIP = 2;
             final int FUNCTION = 3;
+            final int Message = 4;
             final int PinIOStatus = 4;
             final int Temp = 4;
             final int Humi = 5;
@@ -676,9 +728,10 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                     message = new String(lmessage, 0, packet.getLength());
                     lastMessage = message;
                     String[] separated = message.split(delimiter);
+                    lastBefehl = Integer.parseInt(separated[Befehl].toString());
                     //******************************************************************************************
                     try {
-                        switch (Integer.parseInt(separated[Befehl].toString())) {
+                        switch (lastBefehl) {
                             case HELLO:
                                 Log.i(TAG, "Hello");
                                 // Tabellen Aufbau
@@ -738,6 +791,22 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                                 //checked = (Integer.parseInt(separated[UMWELT]) != 0);
                                 runOnUiThread(updateMessageButton);
                                 break;
+                            case UPGRADE:
+                                Log.i(TAG, "UPGRADE:" + separated[Message]);
+                                lastID = Integer.parseInt(separated[ID]);
+                                lastIP = senderIP;
+                                lastFunction = separated[FUNCTION];
+                                lastMsg = separated[Message];
+                                runOnUiThread(updateMessageButton);
+                                break;
+                            case TEXT:
+                                Log.i(TAG, "TEXT:" + separated[Message]);
+                                lastID = Integer.parseInt(separated[ID]);
+                                lastIP = senderIP;
+                                lastFunction = separated[FUNCTION];
+                                lastMsg = separated[Message];
+                                runOnUiThread(updateMessageButton);
+                                break;
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -766,6 +835,10 @@ public class mainActivity extends BaseActivity implements OnClickListener {
 
         public String getLastMessage() {
             return lastMessage;
+        }
+
+        public String getLastMsg() {
+            return lastMsg;
         }
 
         public Integer getLastID() {
@@ -850,8 +923,21 @@ public class mainActivity extends BaseActivity implements OnClickListener {
 
             if (tv != null) {
                 DatabaseHandler_Data db_data = new DatabaseHandler_Data(mainActivity.this);
-                Log.d(TAG, "Set TEXTVIEWS_INFO ID:" + lastID + " to " + "Temp:" + myDatagramReceiver.getLastTemp() + " Humi:" + myDatagramReceiver.getLastHumi());
-                tv.setText("Temp:" + myDatagramReceiver.getLastTemp() + " Humi:" + myDatagramReceiver.getLastHumi());
+                switch (myDatagramReceiver.lastBefehl) {
+                    case UMWELT:
+                        Log.d(TAG, "Set TEXTVIEWS_INFO ID:" + lastID + " to " + "Temp:" + myDatagramReceiver.getLastTemp() + " Humi:" + myDatagramReceiver.getLastHumi());
+                        tv.setText("Temp:" + myDatagramReceiver.getLastTemp() + " Humi:" + myDatagramReceiver.getLastHumi());
+                        break;
+                    case UPGRADE:
+                        Log.d(TAG, "Set TEXTVIEWS_INFO ID:" + lastID + " to " + "Msg:" + myDatagramReceiver.getLastMsg());
+                        tv.setText("Msg:" + myDatagramReceiver.getLastMsg());
+                        break;
+                    case TEXT:
+                        Log.d(TAG, "Set TEXTVIEWS_INFO ID:" + lastID + " to " + "Msg:" + myDatagramReceiver.getLastMsg());
+                        tv.setText("Msg:" + myDatagramReceiver.getLastMsg());
+                        break;
+                }
+
             } else
                 Log.e(TAG, "TEXTVIEWS_INFO ID:" + lastID + " not found");
         }

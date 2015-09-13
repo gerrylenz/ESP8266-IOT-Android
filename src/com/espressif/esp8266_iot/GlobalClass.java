@@ -25,6 +25,8 @@ public class GlobalClass extends Application {
     private int mTargetPort = 18566;
     private int mRemotePort = 18666;
 
+    private String upgradeIpStr = "";
+    private String upgradePortStr = "";
 
     /**
      * *******************************************************************************
@@ -146,7 +148,25 @@ public class GlobalClass extends Application {
         return mRemotePort;
     }
 
-    ;
+    /**
+     * *******************************************************************************
+     */
+    public String get_upgradeIp() {
+        return upgradeIpStr;
+    }
+    public void set_upgradeIp(String Value) {
+        upgradeIpStr = Value;
+    }
+
+    /**
+     * *******************************************************************************
+     */
+    public String get_upgradePort() {
+        return upgradePortStr;
+    }
+    public void set_upgradePort(String Value) {
+        upgradePortStr = Value;
+    }
 
     /**
      * *******************************************************************************

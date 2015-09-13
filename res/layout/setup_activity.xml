@@ -284,6 +284,62 @@
                 android:background="#ffffffff"
                 android:singleLine="false"/>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/textView8"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/UPGRADE_IP"
+                    android:textSize="24sp"/>
+
+                <EditText
+                    tools:ignore="TextFields"
+                    android:id="@+id/edt_Upgrade_ip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ems="10"
+                    android:inputType="text"
+                    android:singleLine="true"
+                    android:text="@string/UPGRADE_IP_Value"
+                    android:textSize="24dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/textView9"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/UPGRADE_PORT"
+                    android:textSize="24sp"/>
+
+                <EditText
+                    tools:ignore="TextFields"
+                    android:id="@+id/edt_Upgrade_port"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ems="10"
+                    android:inputType="text"
+                    android:singleLine="true"
+                    android:text="@string/UPGRADE_PORT_Value"
+                    android:textSize="24dp"/>
+            </LinearLayout>
+
             <Space
                 android:layout_width="match_parent"
                 android:layout_height="15dp"

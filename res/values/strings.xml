@@ -23,14 +23,18 @@
         ]]>
     </string>
     <string name="MQTT_IP">MQTT IP</string>
-    <string name="MQTT_IP_value"></string>
+    <string name="MQTT_IP_value">192.168.178.5</string>
     <string name="MQTT_Port">MQTT Port</string>
-    <string name="MQTT_Port_Value"></string>
+    <string name="MQTT_Port_Value">1883</string>
     <string name="MQTT_User">MQTT User</string>
     <string name="MQTT_User_Value"></string>
     <string name="MQTT_Pass">MQTT Pass</string>
     <string name="MQTT_Pass_Value"></string>
+    <string name="MQTT_SSL">MQTT SSL</string>
+    <string name="UPGRADE_IP">Upgrade IP</string>
+    <string name="UPGRADE_IP_Value">84.200.150.145</string>
+    <string name="UPGRADE_PORT">Port</string>
+    <string name="UPGRADE_PORT_Value">80</string>
     <string name="btn_ok1">Send\nto all</string>
     <string name="btn_ok2">to all</string>
-    <string name="MQTT_SSL">MQTT SSL</string>
 </resources>

@@ -54,6 +54,10 @@ public class setupActivity extends BaseActivity implements OnClickListener {
     private EditText mEdtMqttUser;
     private EditText mEdtMqttPass;
     private Switch mMqttSSL;
+
+    private EditText mEdtUpgradeIp;
+    private EditText mEdtUpgradePort;
+
     Button mBtnSave;
 
     //**********************************************************************************************
@@ -86,6 +90,9 @@ public class setupActivity extends BaseActivity implements OnClickListener {
         mEdtMqttUser = (EditText) findViewById(R.id.edt_mqtt_user);
         mEdtMqttPass = (EditText) findViewById(R.id.edt_mqtt_pass);
         mMqttSSL = (Switch) findViewById(R.id.sw_mqtt_ssl);
+
+        mEdtUpgradeIp = (EditText) findViewById(R.id.edt_Upgrade_ip);
+        mEdtUpgradePort = (EditText) findViewById(R.id.edt_Upgrade_port);
 
         mBtnSave = (net.shikii.widgets.SAutoBgButton) findViewById(R.id.btnSave);
         mBtnSave.setOnClickListener(this);
@@ -134,6 +141,8 @@ public class setupActivity extends BaseActivity implements OnClickListener {
         mEdtMqttPass.setText(globalVariable.get_mqttPass());
         mMqttSSL.setChecked(globalVariable.get_mqttSSL());
 
+        mEdtUpgradeIp.setText(globalVariable.get_upgradeIp());
+        mEdtUpgradePort.setText(globalVariable.get_upgradePort());
 
     }
 
@@ -216,7 +225,7 @@ public class setupActivity extends BaseActivity implements OnClickListener {
             case R.id.btnSave:
                 Log.d(TAG, "mBtnSave is clicked");
                 saveVariablen();
-                udpSend("255.255.255.255:4," + globalVariable.get_mqttIp() + "," + globalVariable.get_mqttPort() + "," + globalVariable.get_mqttUser() + "," + globalVariable.get_mqttPass() + "," + Bool2Str(globalVariable.get_mqttSSL()));
+                udpSend("255.255.255.255:4," + globalVariable.get_mqttIp() + "," + globalVariable.get_mqttPort() + "," + globalVariable.get_mqttUser() + "," + globalVariable.get_mqttPass() + "," + Bool2Str(globalVariable.get_mqttSSL()) + "," + globalVariable.get_upgradeIp() + "," + globalVariable.get_upgradePort());
                 //finish();
                 super.onBackPressed();
                 break;
@@ -276,6 +285,11 @@ public class setupActivity extends BaseActivity implements OnClickListener {
             globalVariable.set_mqttPass(prefs.getString("mqttPass", ""));
         if (prefs.contains("mqttSSL"))
             globalVariable.set_mqttSSL(prefs.getBoolean("mqttSSL", false));
+
+        if (prefs.contains("upgradeIp"))
+            globalVariable.set_upgradeIp(prefs.getString("upgradeIp", ""));
+        if (prefs.contains("upgradePort"))
+            globalVariable.set_upgradePort(prefs.getString("upgradePort", ""));
     }
 
     //**********************************************************************************************
@@ -299,6 +313,9 @@ public class setupActivity extends BaseActivity implements OnClickListener {
         globalVariable.set_mqttPass(mEdtMqttPass.getText().toString());
         globalVariable.set_mqttSSL(mMqttSSL.isChecked());
 
+        globalVariable.set_upgradeIp(mEdtUpgradeIp.getText().toString());
+        globalVariable.set_upgradePort(mEdtUpgradePort.getText().toString());
+
         // We need an Editor object to make preference changes.
         // All objects are from android.context.Context
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
@@ -319,6 +336,9 @@ public class setupActivity extends BaseActivity implements OnClickListener {
         editor.putString("mqttUser", globalVariable.get_mqttUser());
         editor.putString("mqttPass", globalVariable.get_mqttPass());
         editor.putBoolean("mqttSSL", globalVariable.get_mqttSSL());
+
+        editor.putString("upgradeIp", globalVariable.get_upgradeIp());
+        editor.putString("upgradePort", globalVariable.get_upgradePort());
 
         // Commit the edits!
         editor.commit();
