@@ -23,8 +23,7 @@
         <activity
             android:name="com.espressif.esp8266_iot.activitys.mainActivity"
             android:label="@string/app_name"
-            android:parentActivityName="com.espressif.esp8266_iot.activitys.mainActivity"
-            android:screenOrientation="portrait">
+            android:parentActivityName="com.espressif.esp8266_iot.activitys.mainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 

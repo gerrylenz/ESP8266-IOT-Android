@@ -23,6 +23,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
@@ -239,7 +240,7 @@ public class mainActivity extends BaseActivity implements OnClickListener {
 
             DataStore_Name cx = db_name.getData(cn.getID());
 
-            LinearLayout ll = (LinearLayout) findViewById(R.id.SwitchLayout);
+            final LinearLayout ll = (LinearLayout) findViewById(R.id.SwitchLayout);
 
             if (ll.findViewById(cn.getID() * FRAMELAYOUTS) == null) {
                 //*********************************************************
@@ -280,12 +281,17 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                                         int i = tv.getId() / TEXTVIEWS;
                                         switch (which) {
                                             case 0:
+                                                Log.e(TAG, "Loesche ID:" + i);
                                                 if (db_name.IsDataInDB(i)) {
                                                     db_name.deleteDataStore(new DataStore_Name(i));
                                                 }
                                                 if (db_data.IsDataInDB(i)) {
                                                     db_data.deleteDataStore(new DataStore_Data(i));
                                                 }
+                                                //((ViewGroup) tv.getParent()).removeView(tv);
+                                                ll.removeAllViewsInLayout();
+                                                ll.postInvalidate();
+                                                ReadAllModule();
                                                 break;
                                             case 1:
                                                 if (db_data != null) {
@@ -741,6 +747,7 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                                 if (!db_name.IsDataInDB(Integer.parseInt(separated[ID]))) {
                                     db_name.addDataStore(new DataStore_Name(Integer.parseInt(separated[ID]), senderIP));
                                     db_name.close();
+                                    runOnUiThread(updateGUIFrames);
                                 }
                                 break;
                             case STATUS:
@@ -761,6 +768,7 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                                         db_data.updateDataStore(db);
                                         db_data.close();
                                         db_name.close();
+                                        runOnUiThread(updateGUIFrames);
                                     }
                                 } else {
                                     db_data.addDataStore(new DataStore_Data(lastID, lastIP, lastFunction, lastPinIO, 1));
@@ -908,8 +916,10 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                     db_data.updateDataStore(db);
                     db_data.close();
                 }
-            } else
+            } else {
                 Log.e(TAG, "ToggleButton ID:" + lastID + " not found");
+                ReadAllModule();
+            }
 
         }
     };
@@ -938,8 +948,10 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                         break;
                 }
 
-            } else
-                Log.e(TAG, "TEXTVIEWS_INFO ID:" + lastID + " not found");
+            } else {
+                Log.e(TAG, "TEXTVIEWS_INFO ID:" + lastID+ " not found");
+                ReadAllModule();
+            }
         }
     };
     //**********************************************************************************************
