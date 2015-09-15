@@ -246,7 +246,7 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                 //*********************************************************
                 // add FrameLayout
                 Log.i(TAG, "Create FrameLayout");
-                FrameLayout fl = new FrameLayout(this);
+                final FrameLayout fl = new FrameLayout(this);
                 LinearLayout.LayoutParams fl_params = new LinearLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT, 0.15f);
                 fl.setId(cn.getID() * FRAMELAYOUTS);
                 fl.setLayoutParams(fl_params);
@@ -289,9 +289,10 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                                                     db_data.deleteDataStore(new DataStore_Data(i));
                                                 }
                                                 //((ViewGroup) tv.getParent()).removeView(tv);
-                                                ll.removeAllViewsInLayout();
-                                                ll.postInvalidate();
-                                                ReadAllModule();
+                                                fl.removeAllViewsInLayout();
+                                                fl.postInvalidate();
+                                                ll.removeView(fl);
+                                                //ReadAllModule();
                                                 break;
                                             case 1:
                                                 if (db_data != null) {
