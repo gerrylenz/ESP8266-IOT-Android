@@ -41,7 +41,6 @@ import com.espressif.esp8266_iot.GlobalClass;
 import com.espressif.esp8266_iot.R;
 import com.espressif.esp8266_iot.util.BaseActivity;
 
-
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.DatagramPacket;
@@ -615,7 +614,6 @@ public class mainActivity extends BaseActivity implements OnClickListener {
         Log.d(TAG, "BroadcastAddress:" + getByAddress(quads).getHostAddress());
         return getByAddress(quads);
     }
-
     //**********************************************************************************************
     public class MyThread extends Thread {
 
@@ -683,6 +681,7 @@ public class mainActivity extends BaseActivity implements OnClickListener {
         private int lastBefehl = 0;
         private String lastMessage = "";
         private String lastIP = "";
+        private String lastDeviceID = "";
         public String lastFunction = "";
         private String lastPinIO = "";
         private String lastTemp = "";
@@ -710,6 +709,7 @@ public class mainActivity extends BaseActivity implements OnClickListener {
             final int PinIOStatus = 4;
             final int Temp = 4;
             final int Humi = 5;
+            final int KEY_DEV_ID = 5;
 
             String message;
             String delimiter;
@@ -742,8 +742,8 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                             case HELLO:
                                 Log.i(TAG, "Hello");
                                 // Tabellen Aufbau
-                                // KEY_ID, KEY_ADDRESS, KEY_FUNC, KEY_STATUS, KEY_ACTIV
-                                Log.d(TAG, "Broadcast:" + separated[ID] + "," + senderIP + "," + separated[FUNCTION] + "," + separated[PinIOStatus] + "," + "1");
+                                // KEY_ID, KEY_ADDRESS, KEY_FUNC, KEY_STATUS, KEY_ACTIV, KEY_DEV_ID
+                                Log.d(TAG, "Broadcast:" + separated[ID] + "," + senderIP + "," + separated[FUNCTION] + "," + separated[PinIOStatus] + "," + "1" + "," + separated[KEY_DEV_ID]);
                                 db_data.addDataStore(new DataStore_Data(Integer.parseInt(separated[ID]), senderIP, separated[FUNCTION], separated[PinIOStatus], 1));
                                 if (!db_name.IsDataInDB(Integer.parseInt(separated[ID]))) {
                                     db_name.addDataStore(new DataStore_Name(Integer.parseInt(separated[ID]), senderIP));
@@ -759,6 +759,8 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                                 lastPinIO = separated[PinIOStatus];
                                 checked = (Integer.parseInt(separated[PinIOStatus]) != 0);
                                 final TextView tv_ip = (TextView) findViewById(lastID * IPTEXTVIEW);
+
+                                lastDeviceID = separated[KEY_DEV_ID];
 
                                 if (tv_ip != null) {
                                     DataStore_Data db = db_data.getData(lastID);
@@ -854,6 +856,8 @@ public class mainActivity extends BaseActivity implements OnClickListener {
             return lastID;
         }
 
+        public String getLastDeviceID() { return lastDeviceID; }
+
         public String getLastIP() {
             return lastIP;
         }
@@ -888,6 +892,7 @@ public class mainActivity extends BaseActivity implements OnClickListener {
     private Runnable updateGUI = new Runnable() {
         public void run() {
             if (myDatagramReceiver == null) return;
+            Toast.makeText(getApplicationContext(), myDatagramReceiver.getLastDeviceID(), Toast.LENGTH_LONG).show();
             textMessage.setText(myDatagramReceiver.getLastMessage());
 
         }
