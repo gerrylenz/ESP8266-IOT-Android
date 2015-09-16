@@ -31,8 +31,8 @@ public class DatabaseHandler_Data extends SQLiteOpenHelper {
 
     // DataStores Table Columns names
     private static final String KEY_ID = "id";
+    private static final String KEY_DEVID = "devid";
     private static final String KEY_ADDRESS = "address";
-    //private static final String KEY_NAME = "name";
     private static final String KEY_FUNC = "function";
     private static final String KEY_STATUS = "status";
     private static final String KEY_ACTIV = "activ";
@@ -48,6 +48,7 @@ public class DatabaseHandler_Data extends SQLiteOpenHelper {
 
         String CREATE_DataStoreS_TABLE = "CREATE TABLE " + TABLE_DataStoreS + "("
                 + KEY_ID + " INTEGER PRIMARY KEY,"
+                + KEY_DEVID + " TEXT,"
                 + KEY_ADDRESS + " TEXT,"
                 + KEY_FUNC + " TEXT,"
                 + KEY_STATUS + " TEXT,"
@@ -82,6 +83,7 @@ public class DatabaseHandler_Data extends SQLiteOpenHelper {
 
         ContentValues values = new ContentValues();
         values.put(KEY_ID, Data.getID()); // Data ID
+        values.put(KEY_DEVID, Data.getDevID()); // Device ID
         values.put(KEY_ADDRESS, Data.getAddress()); // Data Address
         values.put(KEY_FUNC, Data.getFunction()); // Data Function
         values.put(KEY_STATUS, Data.getStatus()); // Data Status
@@ -104,11 +106,11 @@ public class DatabaseHandler_Data extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
 
         Cursor cursor;
-        cursor = db.query(TABLE_DataStoreS, new String[]{KEY_ID, KEY_ADDRESS, KEY_FUNC, KEY_STATUS, KEY_ACTIV}, KEY_ID + "=?", new String[]{String.valueOf(id)}, null, null, null, null);
+        cursor = db.query(TABLE_DataStoreS, new String[]{KEY_ID, KEY_DEVID, KEY_ADDRESS, KEY_FUNC, KEY_STATUS, KEY_ACTIV}, KEY_ID + "=?", new String[]{String.valueOf(id)}, null, null, null, null);
         if (cursor != null)
             cursor.moveToFirst();
 
-        DataStore_Data datastore = new DataStore_Data( cursor.getInt(0), cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getInt(4) );
+        DataStore_Data datastore = new DataStore_Data( cursor.getInt(0), cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getString(4), cursor.getInt(5) );
         // return DataStore_Data
         return datastore;
     }
@@ -128,9 +130,10 @@ public class DatabaseHandler_Data extends SQLiteOpenHelper {
                 DataStore_Data DataStore_Data = new DataStore_Data();
                 DataStore_Data.setID(cursor.getInt(0));
                 DataStore_Data.setAddress(cursor.getString(1));
-                DataStore_Data.setFunktion(cursor.getString(2));
-                DataStore_Data.setStatus(cursor.getString(3));
-                DataStore_Data.setisActive(cursor.getInt(4));
+                DataStore_Data.setAddress(cursor.getString(2));
+                DataStore_Data.setFunktion(cursor.getString(3));
+                DataStore_Data.setStatus(cursor.getString(4));
+                DataStore_Data.setisActive(cursor.getInt(5));
                 // Adding DataStore_Data to list
                 dataStoreDataList.add(DataStore_Data);
             } while (cursor.moveToNext());
@@ -146,6 +149,7 @@ public class DatabaseHandler_Data extends SQLiteOpenHelper {
 
         ContentValues values = new ContentValues();
         values.put(KEY_ID, Data.getID()); // Data ID
+        values.put(KEY_DEVID, Data.getDevID()); // Data ID
         values.put(KEY_ADDRESS, Data.getAddress()); // Data Name
         values.put(KEY_FUNC, Data.getFunction()); // Data Function
         values.put(KEY_STATUS, Data.getStatus()); // Data Active

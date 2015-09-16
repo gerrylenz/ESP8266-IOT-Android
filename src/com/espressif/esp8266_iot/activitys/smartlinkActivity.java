@@ -298,7 +298,7 @@ public class smartlinkActivity extends BaseActivity implements OnClickListener {
                         Log.d(TAG, "Inserting to Database ..");
                         LogView.setText("Inserting to Database ..");
 
-                        db_data.addDataStore(new DataStore_Data(CRC16CCITT.CRC16(resultInList.getBssid().getBytes(), resultInList.getBssid().length()), resultInList.getInetAddress().getHostAddress(), "NULL", "NULL", 1));
+                        db_data.addDataStore(new DataStore_Data(CRC16CCITT.CRC16(resultInList.getBssid().getBytes(), resultInList.getBssid().length()), "NULL", resultInList.getInetAddress().getHostAddress(), "NULL", "NULL", 1));
                         db_name.addDataStore(new DataStore_Name(CRC16CCITT.CRC16(resultInList.getBssid().getBytes(), resultInList.getBssid().length()), resultInList.getBssid()));
 
                         count++;

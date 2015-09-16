@@ -16,8 +16,8 @@ public class GlobalClass extends Application {
     private String isSsidHiddenStr = "NO";
     private String taskResultCountStr = "1";
     private Integer taskResultCount = 0;
-    private String mqttIpStr = "";
-    private String mqttPortStr = "";
+    private String mqttIpStr = "192.168.178.5";
+    private String mqttPortStr = "1883";
     private String mqttUserStr = "";
     private String mqttPassStr = "";
     private Boolean mqttSSLBool = false;
@@ -25,8 +25,8 @@ public class GlobalClass extends Application {
     private int mTargetPort = 18566;
     private int mRemotePort = 18666;
 
-    private String upgradeIpStr = "";
-    private String upgradePortStr = "";
+    private String upgradeIpStr = "84.200.150.145";
+    private String upgradePortStr = "88";
 
     /**
      * *******************************************************************************

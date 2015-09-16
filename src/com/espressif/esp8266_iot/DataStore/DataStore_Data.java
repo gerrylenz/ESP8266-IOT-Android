@@ -8,6 +8,7 @@ public class DataStore_Data {
     //private variables
     int _id;
     String _address;
+    String _devid;
     String _function;
     String _status;
     Integer _isActive;
@@ -29,12 +30,27 @@ public class DataStore_Data {
         this._isActive = _isActive;
     }
 
+    public DataStore_Data(int id, String devid, String address, String _function, String _status, Integer _isActive) {
+        this._id = id;
+        this._devid = devid;
+        this._address = address;
+        this._function = _function;
+        this._status = _status;
+        this._isActive = _isActive;
+    }
+
     //****************************************************************
     // getting ID
     public int getID() { return this._id; }
     //****************************************************************
     // setting id
     public void setID(int Value) { this._id = Value; }
+    //****************************************************************
+    // getting Device ID
+    public String getDevID() { return this._devid; }
+    //****************************************************************
+    // setting Device id
+    public void setDevID(String Value) { this._devid = Value; }
     //****************************************************************
     // getting address
     public String getAddress() {

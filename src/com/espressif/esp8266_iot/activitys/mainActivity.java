@@ -200,6 +200,7 @@ public class mainActivity extends BaseActivity implements OnClickListener {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, metrics);
     }
     //**********************************************************************************************
+
     /**
      * On selecting action bar icons
      */
@@ -300,9 +301,9 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                                                     Log.d(TAG, "Send UDP to :" + cx.getAddress());
 
                                                     if (cx != null) {
-                                                            new MyThread(cx.getAddress() + ":" + UPGRADE ).start();
-                                                        }
+                                                        new MyThread(cx.getAddress() + ":" + UPGRADE).start();
                                                     }
+                                                }
                                                 Toast.makeText(context, "clicked 2", 0).show();
                                                 break;
                                             case 2:
@@ -361,7 +362,7 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                 //*********************************************************
                 // add text view info
                 TextView tvi = new TextView(this);
-                FrameLayout.LayoutParams tvi_params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, convDpToPx(this, 80) );
+                FrameLayout.LayoutParams tvi_params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, convDpToPx(this, 80));
                 tvi.setLayoutParams(tv_params);
                 tvi.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
                 tvi.setText(cx.getName());
@@ -532,6 +533,10 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                 // set prompts.xml to alertdialog builder
                 alertDialogBuilder.setView(promptsView);
 
+                DatabaseHandler_Data db_data = new DatabaseHandler_Data(context);
+                final TextView tvDevId = (TextView) promptsView.findViewById(R.id.tvDevIDValue);
+                tvDevId.setText(db_data.getData(tv.getId() / TEXTVIEWS).getDevID());
+
                 final EditText userInput = (EditText) promptsView.findViewById(R.id.editTextDialogUserInput);
                 userInput.setText(tv.getText());
 
@@ -614,6 +619,7 @@ public class mainActivity extends BaseActivity implements OnClickListener {
         Log.d(TAG, "BroadcastAddress:" + getByAddress(quads).getHostAddress());
         return getByAddress(quads);
     }
+
     //**********************************************************************************************
     public class MyThread extends Thread {
 
@@ -744,7 +750,11 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                                 // Tabellen Aufbau
                                 // KEY_ID, KEY_ADDRESS, KEY_FUNC, KEY_STATUS, KEY_ACTIV, KEY_DEV_ID
                                 Log.d(TAG, "Broadcast:" + separated[ID] + "," + senderIP + "," + separated[FUNCTION] + "," + separated[PinIOStatus] + "," + "1" + "," + separated[KEY_DEV_ID]);
-                                db_data.addDataStore(new DataStore_Data(Integer.parseInt(separated[ID]), senderIP, separated[FUNCTION], separated[PinIOStatus], 1));
+                                try {
+                                    db_data.addDataStore(new DataStore_Data(Integer.parseInt(separated[ID]), separated[KEY_DEV_ID], senderIP, separated[FUNCTION], separated[PinIOStatus], 1));
+                                } catch (Exception e) {
+                                    db_data.addDataStore(new DataStore_Data(Integer.parseInt(separated[ID]), senderIP, separated[FUNCTION], separated[PinIOStatus], 1));
+                                }
                                 if (!db_name.IsDataInDB(Integer.parseInt(separated[ID]))) {
                                     db_name.addDataStore(new DataStore_Name(Integer.parseInt(separated[ID]), senderIP));
                                     db_name.close();
@@ -754,13 +764,18 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                             case STATUS:
                                 Log.i(TAG, "STATUS");
                                 lastID = Integer.parseInt(separated[ID]);
+                                try {
+                                    lastDeviceID = separated[KEY_DEV_ID];
+                                } catch (Exception e) {
+                                    lastDeviceID = String.valueOf(lastID);
+                                }
+
                                 lastIP = senderIP;
                                 lastFunction = separated[FUNCTION];
                                 lastPinIO = separated[PinIOStatus];
                                 checked = (Integer.parseInt(separated[PinIOStatus]) != 0);
                                 final TextView tv_ip = (TextView) findViewById(lastID * IPTEXTVIEW);
 
-                                lastDeviceID = separated[KEY_DEV_ID];
 
                                 if (tv_ip != null) {
                                     DataStore_Data db = db_data.getData(lastID);
@@ -774,7 +789,11 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                                         runOnUiThread(updateGUIFrames);
                                     }
                                 } else {
-                                    db_data.addDataStore(new DataStore_Data(lastID, lastIP, lastFunction, lastPinIO, 1));
+                                    try {
+                                        db_data.addDataStore(new DataStore_Data(lastID, lastDeviceID, lastIP, lastFunction, lastPinIO, 1));
+                                    } catch (Exception e) {
+                                        db_data.addDataStore(new DataStore_Data(lastID, lastIP, lastFunction, lastPinIO, 1));
+                                    }
                                     db_name.addDataStore(new DataStore_Name(lastID, lastIP));
                                     db_data.close();
                                     db_name.close();
@@ -856,7 +875,9 @@ public class mainActivity extends BaseActivity implements OnClickListener {
             return lastID;
         }
 
-        public String getLastDeviceID() { return lastDeviceID; }
+        public String getLastDeviceID() {
+            return lastDeviceID;
+        }
 
         public String getLastIP() {
             return lastIP;
@@ -873,6 +894,7 @@ public class mainActivity extends BaseActivity implements OnClickListener {
         public String getLastTemp() {
             return lastTemp;
         }
+
         public String getLastHumi() {
             return lastHumi;
         }
@@ -892,7 +914,7 @@ public class mainActivity extends BaseActivity implements OnClickListener {
     private Runnable updateGUI = new Runnable() {
         public void run() {
             if (myDatagramReceiver == null) return;
-            Toast.makeText(getApplicationContext(), myDatagramReceiver.getLastDeviceID(), Toast.LENGTH_LONG).show();
+            //Toast.makeText(getApplicationContext(), myDatagramReceiver.getLastDeviceID(), Toast.LENGTH_LONG).show();
             textMessage.setText(myDatagramReceiver.getLastMessage());
 
         }
@@ -955,7 +977,7 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                 }
 
             } else {
-                Log.e(TAG, "TEXTVIEWS_INFO ID:" + lastID+ " not found");
+                Log.e(TAG, "TEXTVIEWS_INFO ID:" + lastID + " not found");
                 ReadAllModule();
             }
         }
