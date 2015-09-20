@@ -22,8 +22,8 @@ public class GlobalClass extends Application {
     private String mqttPassStr = "";
     private Boolean mqttSSLBool = false;
 
-    private int mTargetPort = 18566;
-    private int mRemotePort = 18666;
+    private int mTargetPort = 18666;
+    private int mRemotePort = 18566;
 
     private String upgradeIpStr = "84.200.150.145";
     private String upgradePortStr = "88";
