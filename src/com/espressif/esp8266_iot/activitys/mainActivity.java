@@ -12,6 +12,8 @@ import android.net.DhcpInfo;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.os.Vibrator;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -64,6 +66,7 @@ public class mainActivity extends BaseActivity implements OnClickListener {
     public static final int UMWELT = 5;
     public static final int UPGRADE = 6;
     public static final int TEXT = 7;
+    public static final int VERSION = 8;
 
 
     public static final String PREFS_NAME = "MyPrefsFile";
@@ -264,7 +267,7 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                     @Override
                     public boolean onLongClick(View v) {
                         Log.e(TAG, "onLongClick ID:" + v.getId());
-                        Vibrator vib = (Vibrator) getSystemService(context.VIBRATOR_SERVICE);
+                        Vibrator vib = (Vibrator) getSystemService(VIBRATOR_SERVICE);
                         vib.vibrate(1000);
 
                         final TextView tv = (TextView) v.findViewById(v.getId());
@@ -273,7 +276,7 @@ public class mainActivity extends BaseActivity implements OnClickListener {
 
                         builder.setTitle("Bitte wählen");
                         builder.setItems(new CharSequence[]
-                                        {"Löschen", "Upgrade", "Abbruch"},
+                                        {"Löschen", "Upgrade", "Version", "Abbruch"},
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
                                         DatabaseHandler_Name db_name = new DatabaseHandler_Name(context);
@@ -304,9 +307,19 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                                                         new MyThread(cx.getAddress() + ":" + UPGRADE).start();
                                                     }
                                                 }
-                                                Toast.makeText(context, "clicked 2", 0).show();
                                                 break;
                                             case 2:
+                                                WifiManager wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
+                                                int ipAddress = wifiManager.getConnectionInfo().getIpAddress();
+                                                String ipAddress_str = String.format("%d.%d.%d.%d",
+                                                        (ipAddress & 0xff),
+                                                        (ipAddress >> 8 & 0xff),
+                                                        (ipAddress >> 16 & 0xff),
+                                                        (255));
+                                                Log.d(TAG, "Send UDP to :" + ipAddress_str);
+                                                new MyThread(ipAddress_str + ":" + VERSION).start();
+                                                break;
+                                            case 3:
                                                 Toast.makeText(context, "Abbruch", 0).show();
                                                 break;
                                         }
@@ -641,7 +654,6 @@ public class mainActivity extends BaseActivity implements OnClickListener {
             String messageStr = value;
             InetAddress to_ip = null;
             DatagramSocket s = null;
-            ;
             final GlobalClass globalVariable = (GlobalClass) getApplicationContext();
 
             try {
@@ -679,7 +691,6 @@ public class mainActivity extends BaseActivity implements OnClickListener {
             }
         }
     }
-
     //**********************************************************************************************
 //http://stackoverflow.com/questions/16752205/simple-udp-server-for-android-and-get-multi-messages
     private class MyDatagramReceiver extends Thread {
@@ -698,12 +709,30 @@ public class mainActivity extends BaseActivity implements OnClickListener {
         DatagramSocket socket;
         final GlobalClass globalVariable = (GlobalClass) getApplicationContext();
 
+        private Handler handler = new Handler(){
+            @Override
+            public void handleMessage(Message msg) {
+                Bundle dataBundle = (Bundle) msg.obj;
+                new AlertDialog.Builder(context)
+                        .setTitle("Modul Info")
+                        .setMessage("SDK: V" + dataBundle.get("sdk") + "\r\nFirmware: V" + dataBundle.get("fw"))
+                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                // continue with delete
+                            }
+                        })
+                        .setIcon(android.R.drawable.ic_dialog_info)
+                        .show();
+            }
+        };
+
 
         @Override
         public void run() {
             Log.i(TAG, "MyDatagramReceiver gestartet");
 
-
+            Handler mHandler = handler;
+            int MESSAGE_VERSION_RECEIVED = 0;
             final int AN = 1;
             final int AUS = 0;
 
@@ -712,6 +741,8 @@ public class mainActivity extends BaseActivity implements OnClickListener {
             final int LocaleIP = 2;
             final int FUNCTION = 3;
             final int Message = 4;
+            final int SDK = 4;
+            final int FIRMWARE = 5;
             final int PinIOStatus = 4;
             final int Temp = 4;
             final int Humi = 5;
@@ -837,6 +868,14 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                                 lastMsg = separated[Message];
                                 runOnUiThread(updateMessageButton);
                                 break;
+                            case VERSION:
+                                Log.i(TAG, "VERSION: " + "SDK:" + separated[SDK] + " Firmware:" + separated[FIRMWARE]);
+                                Bundle DataBundle = new Bundle();
+                                DataBundle.putString("sdk",separated[SDK]);
+                                DataBundle.putString("fw", separated[FIRMWARE]);
+                                mHandler.obtainMessage(MESSAGE_VERSION_RECEIVED, 0, 0, DataBundle).sendToTarget();
+                                break;
+
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
