@@ -25,7 +25,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
@@ -47,12 +46,9 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.net.UnknownHostException;
 import java.nio.ByteOrder;
 import java.util.List;
@@ -69,6 +65,7 @@ public class mainActivity extends BaseActivity implements OnClickListener {
     public static final int UPGRADE = 6;
     public static final int TEXT = 7;
     public static final int VERSION = 8;
+    public static final int IMPULS = 9;
 
 
     public static final String PREFS_NAME = "MyPrefsFile";
@@ -278,7 +275,7 @@ public class mainActivity extends BaseActivity implements OnClickListener {
 
                         builder.setTitle("Bitte wählen");
                         builder.setItems(new CharSequence[]
-                                        {"Löschen", "Version", "Upgrade", "Abbruch"},
+                                        {"Löschen", "Version", "Reset", "Upgrade", "Abbruch"},
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
                                         DatabaseHandler_Name db_name = new DatabaseHandler_Name(context);
@@ -313,6 +310,15 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                                                     DataStore_Data cx = db_data.getData(i);
                                                     Log.d(TAG, "Send UDP to :" + cx.getAddress());
                                                     if (cx != null) {
+                                                        new MyThread(cx.getAddress() + ":" + RESET).start();
+                                                    }
+                                                }
+                                                break;
+                                            case 3:
+                                                if (db_data != null) {
+                                                    DataStore_Data cx = db_data.getData(i);
+                                                    Log.d(TAG, "Send UDP to :" + cx.getAddress());
+                                                    if (cx != null) {
                                                         if(!ex_ping()){
                                                             new MyThread(cx.getAddress() + ":" + UPGRADE).start();
                                                         }else{
@@ -330,7 +336,7 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                                                     }
                                                 }
                                                 break;
-                                            case 3:
+                                            case 4:
                                                 Toast.makeText(context, "Abbruch", 0).show();
                                                 break;
                                         }
@@ -418,6 +424,12 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                 tb.setTextOff("OFF");
                 tb.setId(cn.getID() * TOGGLEBUTTONS);
                 tb.setOnClickListener(this);
+                tb.setOnLongClickListener(new View.OnLongClickListener() {
+                    public boolean onLongClick(View v) {
+                        longclick(v);
+                        return true;
+                    }
+                });
                 Log.v(TAG, "Add ToggleButton ID:" + tb.getId());
                 fl.addView(tb);
                 //*********************************************************
@@ -489,11 +501,23 @@ public class mainActivity extends BaseActivity implements OnClickListener {
     }
 
     //**********************************************************************************************
-    public boolean onLongClick(View view) {
-        Log.e(TAG, "Longpress detected");
-        return true;
-    }
+    public void longclick(View v) {
+        Vibrator vib = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+        vib.vibrate(500);
+        Log.i(TAG, "Button mit ID : " + String.valueOf(v.getId()) + " Class:" + v.getClass().getSimpleName() + " gedrückt");
+        final GlobalClass globalVariable = (GlobalClass) getApplicationContext();
+         Log.i(TAG, "Long klick");
+        final ToggleButton tb = (ToggleButton) v;
+        DatabaseHandler_Data db_data = new DatabaseHandler_Data(this);
 
+        if (db_data != null) {
+            DataStore_Data cx = db_data.getData(tb.getId() / TOGGLEBUTTONS);
+            if (cx != null) {
+                new MyThread(cx.getAddress() + ":" + IMPULS + "," + globalVariable.get_ImpulsLengthStr()).start();
+            }
+        }
+        db_data.close();
+    }
     //**********************************************************************************************
     @Override
     public void onClick(View v) {
@@ -852,7 +876,7 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                                     db_name.close();
                                     //runOnUiThread(updateGUI);
                                 }
-                                runOnUiThread(updateMessageButton);
+                                runOnUiThread(updateViews);
                                 //runOnUiThread(updateToggleButton);
                                 break;
                             case RELAY:
@@ -870,7 +894,7 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                                 lastIP = senderIP;
                                 lastFunction = separated[FUNCTION];
                                 lastMsg = separated[Message];
-                                runOnUiThread(updateMessageButton);
+                                runOnUiThread(updateViews);
                                 break;
                             case TEXT:
                                 Log.i(TAG, "TEXT:" + separated[Message]);
@@ -878,7 +902,7 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                                 lastIP = senderIP;
                                 lastFunction = separated[FUNCTION];
                                 lastMsg = separated[Message];
-                                runOnUiThread(updateMessageButton);
+                                runOnUiThread(updateViews);
                                 break;
                             case VERSION:
                                 Log.i(TAG, "VERSION: " + "SDK:" + separated[SDK] + " Firmware:" + separated[FIRMWARE]);
@@ -1004,7 +1028,7 @@ public class mainActivity extends BaseActivity implements OnClickListener {
         }
     };
     //**********************************************************************************************
-    private Runnable updateMessageButton = new Runnable() {
+    private Runnable updateViews = new Runnable() {
         public void run() {
             if (myDatagramReceiver == null) return;
 
@@ -1038,6 +1062,7 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                         tv.setText("Msg:" + myDatagramReceiver.getLastMsg());
                         break;
                 }
+                myDatagramReceiver.lastBefehl = 0;
 
             } else {
                 Log.e(TAG, "TEXTVIEWS_INFO ID:" + lastID + " not found");

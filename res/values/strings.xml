@@ -37,5 +37,9 @@
     <string name="UPGRADE_PORT_Value">80</string>
     <string name="btn_ok1">Send\nto all</string>
     <string name="btn_ok2">to all</string>
+
+    <string name="ImpulsText">Impulslänge</string>
+    <string name="Impuls_Value">1000</string>
+
     <string name="Alert_Versionbuilder">Version</string>
 </resources>

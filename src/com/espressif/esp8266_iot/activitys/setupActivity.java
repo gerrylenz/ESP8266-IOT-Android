@@ -58,6 +58,8 @@ public class setupActivity extends BaseActivity implements OnClickListener {
     private EditText mEdtUpgradeIp;
     private EditText mEdtUpgradePort;
 
+    private EditText mEdtImpulsLength;
+
     Button mBtnSave;
 
     //**********************************************************************************************
@@ -93,6 +95,8 @@ public class setupActivity extends BaseActivity implements OnClickListener {
 
         mEdtUpgradeIp = (EditText) findViewById(R.id.edt_Upgrade_ip);
         mEdtUpgradePort = (EditText) findViewById(R.id.edt_Upgrade_port);
+
+        mEdtImpulsLength = (EditText) findViewById(R.id.edt_Impuls_length);
 
         mBtnSave = (net.shikii.widgets.SAutoBgButton) findViewById(R.id.btnSave);
         mBtnSave.setOnClickListener(this);
@@ -143,6 +147,8 @@ public class setupActivity extends BaseActivity implements OnClickListener {
 
         mEdtUpgradeIp.setText(globalVariable.get_upgradeIp());
         mEdtUpgradePort.setText(globalVariable.get_upgradePort());
+
+        mEdtImpulsLength.setText(globalVariable.get_ImpulsLengthStr());
 
     }
 
@@ -207,15 +213,11 @@ public class setupActivity extends BaseActivity implements OnClickListener {
         return value ? 1 : 0;
     }
 
-    ;
-
     //**********************************************************************************************
     private String Bool2Str(Boolean value) {
         int b = value ? 1 : 0;
         return String.valueOf(b);
     }
-
-    ;
 
     //**********************************************************************************************
     @Override
@@ -290,6 +292,9 @@ public class setupActivity extends BaseActivity implements OnClickListener {
             globalVariable.set_upgradeIp(prefs.getString("upgradeIp", ""));
         if (prefs.contains("upgradePort"))
             globalVariable.set_upgradePort(prefs.getString("upgradePort", ""));
+
+        if (prefs.contains("ImpulsLength"))
+            globalVariable.set_upgradePort(prefs.getString("ImpulsLength", ""));
     }
 
     //**********************************************************************************************
@@ -316,6 +321,8 @@ public class setupActivity extends BaseActivity implements OnClickListener {
         globalVariable.set_upgradeIp(mEdtUpgradeIp.getText().toString());
         globalVariable.set_upgradePort(mEdtUpgradePort.getText().toString());
 
+        globalVariable.set_ImpulsLengthStr(mEdtImpulsLength.getText().toString());
+
         // We need an Editor object to make preference changes.
         // All objects are from android.context.Context
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
@@ -339,6 +346,9 @@ public class setupActivity extends BaseActivity implements OnClickListener {
 
         editor.putString("upgradeIp", globalVariable.get_upgradeIp());
         editor.putString("upgradePort", globalVariable.get_upgradePort());
+
+        editor.putString("EdtImpulsLength", globalVariable.get_ImpulsLengthStr());
+
 
         // Commit the edits!
         editor.commit();

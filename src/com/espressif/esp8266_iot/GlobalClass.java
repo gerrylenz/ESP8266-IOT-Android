@@ -28,6 +28,8 @@ public class GlobalClass extends Application {
     private String upgradeIpStr = "84.200.150.145";
     private String upgradePortStr = "88";
 
+    private String ImpulsLengthStr = "1000";
+
     /**
      * *******************************************************************************
      */
@@ -137,16 +139,12 @@ public class GlobalClass extends Application {
     /**
      * *******************************************************************************
      */
-    public int get_TargetPort() {
-        return mTargetPort;
-    }
+    public int get_TargetPort() { return mTargetPort; }
 
     /**
      * *******************************************************************************
      */
-    public int get_RemotePort() {
-        return mRemotePort;
-    }
+    public int get_RemotePort() { return mRemotePort; }
 
     /**
      * *******************************************************************************
@@ -166,6 +164,16 @@ public class GlobalClass extends Application {
     }
     public void set_upgradePort(String Value) {
         upgradePortStr = Value;
+    }
+
+    /**
+     * *******************************************************************************
+     */
+    public String get_ImpulsLengthStr() {
+        return ImpulsLengthStr;
+    }
+    public void set_ImpulsLengthStr(String Value) {
+        ImpulsLengthStr = Value;
     }
 
     /**
