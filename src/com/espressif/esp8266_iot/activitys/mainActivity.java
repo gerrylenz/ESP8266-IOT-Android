@@ -61,7 +61,6 @@ import static java.net.InetAddress.*;
 
 public class mainActivity extends BaseActivity implements OnClickListener {
 
-    public static final int HELLO = 0;
     public static final int STATUS = 1;
     public static final int RESET = 2;
     public static final int RELAY = 3;
@@ -808,28 +807,13 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                     //******************************************************************************************
                     try {
                         switch (lastBefehl) {
-                            case HELLO:
-                                Log.i(TAG, "Hello");
-                                // Tabellen Aufbau
-                                // KEY_ID, KEY_ADDRESS, KEY_FUNC, KEY_STATUS, KEY_ACTIV, KEY_DEV_ID
-                                Log.d(TAG, "Broadcast:" + separated[ID] + "," + senderIP + "," + separated[FUNCTION] + "," + separated[PinIOStatus] + "," + "1" + "," + separated[6]);
-                                try {
-                                    db_data.addDataStore(new DataStore_Data(Integer.parseInt(separated[ID]), separated[KEY_DEV_ID], senderIP, separated[FUNCTION], separated[PinIOStatus], 1));
-                                } catch (Exception e) {
-                                    db_data.addDataStore(new DataStore_Data(Integer.parseInt(separated[ID]), senderIP, separated[FUNCTION], separated[PinIOStatus], 1));
-                                }
-                                if (!db_name.IsDataInDB(Integer.parseInt(separated[ID]))) {
-                                    db_name.addDataStore(new DataStore_Name(Integer.parseInt(separated[ID]), senderIP));
-                                    db_name.close();
-                                    runOnUiThread(updateGUIFrames);
-                                }
-                                break;
                             case STATUS:
                                 Log.i(TAG, "STATUS Seperated Length :" + separated.length);
                                 for(int i=0; i<separated.length; i++)
                                 {
                                     Log.i(TAG, "STATUS Seperated String[" + i + "] :" + separated[i]);
                                 }
+
                                 lastID = Integer.parseInt(separated[ID]);
                                 try {
                                     lastDeviceID = separated[KEY_DEV_ID];
@@ -879,16 +863,6 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                                 lastPinIO = separated[PinIOStatus];
                                 checked = (Integer.parseInt(separated[PinIOStatus]) != 0);
                                 runOnUiThread(updateToggleButton);
-                                break;
-                            case UMWELT:
-                                //Log.i(TAG, "UMWELT");
-                                //lastID = Integer.parseInt(separated[ID]);
-                                //lastIP = senderIP;
-                                //lastFunction = separated[FUNCTION];
-                                //lastTemp = separated[Temp];
-                                //lastHumi = separated[Humi];
-                                //checked = (Integer.parseInt(separated[UMWELT]) != 0);
-                                //runOnUiThread(updateMessageButton);
                                 break;
                             case UPGRADE:
                                 Log.i(TAG, "UPGRADE:" + separated[Message]);
