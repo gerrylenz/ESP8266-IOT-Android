@@ -227,7 +227,7 @@ public class setupActivity extends BaseActivity implements OnClickListener {
             case R.id.btnSave:
                 Log.d(TAG, "mBtnSave is clicked");
                 saveVariablen();
-                udpSend("255.255.255.255:4," + globalVariable.get_mqttIp() + "," + globalVariable.get_mqttPort() + "," + globalVariable.get_mqttUser() + "," + globalVariable.get_mqttPass() + "," + Bool2Str(globalVariable.get_mqttSSL()) + "," + globalVariable.get_upgradeIp() + "," + globalVariable.get_upgradePort());
+                udpSend("255.255.255.255:4," + globalVariable.get_mqttIp() + ";" + globalVariable.get_mqttPort() + ";" + globalVariable.get_mqttUser() + ";" + globalVariable.get_mqttPass() + ";" + Bool2Str(globalVariable.get_mqttSSL()) + ";" + globalVariable.get_upgradeIp() + ";" + globalVariable.get_upgradePort());
                 //finish();
                 super.onBackPressed();
                 break;
@@ -294,7 +294,7 @@ public class setupActivity extends BaseActivity implements OnClickListener {
             globalVariable.set_upgradePort(prefs.getString("upgradePort", ""));
 
         if (prefs.contains("ImpulsLength"))
-            globalVariable.set_upgradePort(prefs.getString("ImpulsLength", ""));
+            globalVariable.set_ImpulsLengthStr(prefs.getString("ImpulsLength", ""));
     }
 
     //**********************************************************************************************
@@ -347,7 +347,7 @@ public class setupActivity extends BaseActivity implements OnClickListener {
         editor.putString("upgradeIp", globalVariable.get_upgradeIp());
         editor.putString("upgradePort", globalVariable.get_upgradePort());
 
-        editor.putString("EdtImpulsLength", globalVariable.get_ImpulsLengthStr());
+        editor.putString("ImpulsLength", globalVariable.get_ImpulsLengthStr());
 
 
         // Commit the edits!

@@ -319,9 +319,9 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                                                     DataStore_Data cx = db_data.getData(i);
                                                     Log.d(TAG, "Send UDP to :" + cx.getAddress());
                                                     if (cx != null) {
-                                                        if(!ex_ping()){
+                                                        if (!ex_ping()) {
                                                             new MyThread(cx.getAddress() + ":" + UPGRADE).start();
-                                                        }else{
+                                                        } else {
                                                             AlertDialog.Builder builder = new AlertDialog.Builder(context);
                                                             builder.setTitle("Fehler")
                                                                     .setMessage("Upgrade Server nicht erreichbar!")
@@ -506,18 +506,19 @@ public class mainActivity extends BaseActivity implements OnClickListener {
         vib.vibrate(500);
         Log.i(TAG, "Button mit ID : " + String.valueOf(v.getId()) + " Class:" + v.getClass().getSimpleName() + " gedrückt");
         final GlobalClass globalVariable = (GlobalClass) getApplicationContext();
-         Log.i(TAG, "Long klick");
+        Log.i(TAG, "Long klick");
         final ToggleButton tb = (ToggleButton) v;
         DatabaseHandler_Data db_data = new DatabaseHandler_Data(this);
 
         if (db_data != null) {
             DataStore_Data cx = db_data.getData(tb.getId() / TOGGLEBUTTONS);
             if (cx != null) {
-                new MyThread(cx.getAddress() + ":" + IMPULS + "," + globalVariable.get_ImpulsLengthStr()).start();
+                new MyThread(cx.getAddress() + ":" + IMPULS + ";" + globalVariable.get_ImpulsLengthStr()).start();
             }
         }
         db_data.close();
     }
+
     //**********************************************************************************************
     @Override
     public void onClick(View v) {
@@ -560,9 +561,9 @@ public class mainActivity extends BaseActivity implements OnClickListener {
 
                 if (cx != null) {
                     if (tb.isChecked()) {
-                        new MyThread(cx.getAddress() + ":" + RELAY + "," + AN).start();
+                        new MyThread(cx.getAddress() + ":" + RELAY + ";" + AN).start();
                     } else {
-                        new MyThread(cx.getAddress() + ":" + RELAY + "," + AUS).start();
+                        new MyThread(cx.getAddress() + ":" + RELAY + ";" + AUS).start();
                     }
                 }
             }
@@ -685,6 +686,7 @@ public class mainActivity extends BaseActivity implements OnClickListener {
         }
         return false;
     }
+
     //**********************************************************************************************
     public class MyThread extends Thread {
 
@@ -804,7 +806,7 @@ public class mainActivity extends BaseActivity implements OnClickListener {
 
             String message;
             String delimiter;
-            delimiter = "\\,";
+            delimiter = "\\;";
 
             byte[] lmessage = new byte[MAX_UDP_DATAGRAM_LEN];
 
@@ -824,104 +826,109 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                     socket.receive(packet);
                     String senderIP = packet.getAddress().getHostAddress();
                     message = new String(lmessage, 0, packet.getLength());
-                    lastMessage = message;
-                    String[] separated = message.split(delimiter);
-                    lastBefehl = Integer.parseInt(separated[Befehl].toString());
                     Log.i(TAG, "Message String:" + message);
-                    //******************************************************************************************
-                    try {
-                        switch (lastBefehl) {
-                            case STATUS:
-                                Log.i(TAG, "STATUS Seperated Length :" + separated.length);
-                                for(int i=0; i<separated.length; i++)
-                                {
-                                    Log.i(TAG, "STATUS Seperated String[" + i + "] :" + separated[i]);
-                                }
+                    lastMessage = message;
+                    if (message.contains(";")) {
+                        String[] separated = message.split(";");
+                        //******************************************************************************************
+                        try {
+                            lastBefehl = Integer.parseInt(separated[Befehl].toString());
 
-                                lastID = Integer.parseInt(separated[ID]);
-                                try {
-                                    lastDeviceID = separated[KEY_DEV_ID];
-                                } catch (Exception e) {
-                                    lastDeviceID = String.valueOf(lastID);
-                                }
+                            switch (lastBefehl) {
+                                case STATUS:
+                                    Log.i(TAG, "STATUS Seperated Length :" + separated.length);
+                                    for (int i = 0; i < separated.length; i++) {
+                                        Log.i(TAG, "STATUS Seperated String[" + i + "] :" + separated[i]);
+                                    }
 
-                                lastIP = senderIP;
-                                lastFunction = separated[FUNCTION];
-                                lastPinIO = separated[PinIOStatus];
-                                checked = (Integer.parseInt(lastPinIO) != 0);
-                                lastTemp = separated[Temp];
-                                lastHumi = separated[Humi];
-                                final TextView tv_ip = (TextView) findViewById(lastID * IPTEXTVIEW);
+                                    lastID = Integer.parseInt(separated[ID]);
+
+                                    try {
+                                        lastDeviceID = separated[KEY_DEV_ID];
+                                        Log.i(TAG, "Dev ID :" + lastDeviceID);
+                                    } catch (Exception e) {
+                                        lastDeviceID = String.valueOf(lastID);
+                                        Log.i(TAG, "Dev ID as lastID:" + lastDeviceID);
+                                    }
+
+                                    lastIP = senderIP;
+                                    lastFunction = separated[FUNCTION];
+                                    lastPinIO = separated[PinIOStatus];
+                                    checked = (Integer.parseInt(lastPinIO) != 0);
+                                    lastTemp = separated[Temp];
+                                    lastHumi = separated[Humi];
+                                    final TextView tv_ip = (TextView) findViewById(lastID * IPTEXTVIEW);
 
 
-                                if (tv_ip != null) {
-                                    DataStore_Data db = db_data.getData(lastID);
-                                    if (!tv_ip.getText().toString().equals(lastIP)) {
-                                        Log.d(TAG, "IP des Moduls " + lastID + " von " + db.getAddress() + " auf " + lastIP + " aktualisiert");
-                                        tv_ip.setText(lastIP);
-                                        db.setAddress(lastIP);
-                                        db_data.updateDataStore(db);
+                                    if (tv_ip != null) {
+                                        DataStore_Data db = db_data.getData(lastID);
+                                        if (!tv_ip.getText().toString().equals(lastIP)) {
+                                            Log.d(TAG, "IP des Moduls " + lastID + " von " + db.getAddress() + " auf " + lastIP + " aktualisiert");
+                                            tv_ip.setText(lastIP);
+                                            db.setAddress(lastIP);
+                                            db_data.updateDataStore(db);
+                                            db_data.close();
+                                            db_name.close();
+                                            runOnUiThread(updateGUIFrames);
+                                        }
+                                    } else {
+                                        try {
+                                            db_data.addDataStore(new DataStore_Data(lastID, lastDeviceID, lastIP, lastFunction, lastPinIO, 1));
+                                        } catch (Exception e) {
+                                            Log.d(TAG, "Error->" + "db_data.addDataStore(new DataStore_Data(lastID, lastDeviceID, lastIP, lastFunction, lastPinIO, 1));");
+                                        }
+                                        db_name.addDataStore(new DataStore_Name(lastID, lastIP));
                                         db_data.close();
                                         db_name.close();
-                                        runOnUiThread(updateGUIFrames);
+                                        //runOnUiThread(updateGUI);
                                     }
-                                } else {
-                                    try {
-                                        db_data.addDataStore(new DataStore_Data(lastID, lastDeviceID, lastIP, lastFunction, lastPinIO, 1));
-                                    } catch (Exception e) {
-                                        db_data.addDataStore(new DataStore_Data(lastID, lastIP, lastFunction, lastPinIO, 1));
-                                    }
-                                    db_name.addDataStore(new DataStore_Name(lastID, lastIP));
-                                    db_data.close();
-                                    db_name.close();
-                                    //runOnUiThread(updateGUI);
-                                }
-                                runOnUiThread(updateViews);
-                                //runOnUiThread(updateToggleButton);
-                                break;
-                            case RELAY:
-                                Log.i(TAG, "RELAY");
-                                lastID = Integer.parseInt(separated[ID]);
-                                lastIP = senderIP;
-                                lastFunction = separated[FUNCTION];
-                                lastPinIO = separated[PinIOStatus];
-                                checked = (Integer.parseInt(separated[PinIOStatus]) != 0);
-                                runOnUiThread(updateToggleButton);
-                                break;
-                            case UPGRADE:
-                                Log.i(TAG, "UPGRADE:" + separated[Message]);
-                                lastID = Integer.parseInt(separated[ID]);
-                                lastIP = senderIP;
-                                lastFunction = separated[FUNCTION];
-                                lastMsg = separated[Message];
-                                runOnUiThread(updateViews);
-                                break;
-                            case TEXT:
-                                Log.i(TAG, "TEXT:" + separated[Message]);
-                                lastID = Integer.parseInt(separated[ID]);
-                                lastIP = senderIP;
-                                lastFunction = separated[FUNCTION];
-                                lastMsg = separated[Message];
-                                runOnUiThread(updateViews);
-                                break;
-                            case VERSION:
-                                Log.i(TAG, "VERSION: " + "SDK:" + separated[SDK] + " Firmware:" + separated[FIRMWARE]);
-                                Bundle DataBundle = new Bundle();
-                                DataBundle.clear();
-                                DataBundle.putString("sdk", separated[SDK]);
-                                DataBundle.putString("fw", separated[FIRMWARE]);
-                                mHandler.obtainMessage(MESSAGE_VERSION_RECEIVED, 0, 0, DataBundle).sendToTarget();
-                                break;
+                                    runOnUiThread(updateViews);
+                                    //runOnUiThread(updateToggleButton);
+                                    break;
+                                case RELAY:
+                                    Log.i(TAG, "RELAY");
+                                    lastID = Integer.parseInt(separated[ID]);
+                                    lastIP = senderIP;
+                                    lastFunction = separated[FUNCTION];
+                                    lastPinIO = separated[PinIOStatus];
+                                    checked = (Integer.parseInt(separated[PinIOStatus]) != 0);
+                                    runOnUiThread(updateToggleButton);
+                                    break;
+                                case UPGRADE:
+                                    Log.i(TAG, "UPGRADE:" + separated[Message]);
+                                    lastID = Integer.parseInt(separated[ID]);
+                                    lastIP = senderIP;
+                                    lastFunction = separated[FUNCTION];
+                                    lastMsg = separated[Message];
+                                    runOnUiThread(updateViews);
+                                    break;
+                                case TEXT:
+                                    Log.i(TAG, "TEXT:" + separated[Message]);
+                                    lastID = Integer.parseInt(separated[ID]);
+                                    lastIP = senderIP;
+                                    lastFunction = separated[FUNCTION];
+                                    lastMsg = separated[Message];
+                                    runOnUiThread(updateViews);
+                                    break;
+                                case VERSION:
+                                    Log.i(TAG, "VERSION: " + "SDK:" + separated[SDK] + " Firmware:" + separated[FIRMWARE]);
+                                    Bundle DataBundle = new Bundle();
+                                    DataBundle.clear();
+                                    DataBundle.putString("sdk", separated[SDK]);
+                                    DataBundle.putString("fw", separated[FIRMWARE]);
+                                    mHandler.obtainMessage(MESSAGE_VERSION_RECEIVED, 0, 0, DataBundle).sendToTarget();
+                                    break;
 
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Log.e(TAG, "Error0: " + e.getMessage());
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        Log.e(TAG, "Error0: " + e.getMessage());
+
+                        //******************************************************************************************
+
+                        runOnUiThread(updateGUI);
                     }
-
-                    //******************************************************************************************
-
-                    runOnUiThread(updateGUI);
                 }
 
                 if (socket != null) {
@@ -933,6 +940,7 @@ public class mainActivity extends BaseActivity implements OnClickListener {
                 e.printStackTrace();
                 Log.e(TAG, "Error1: " + e.getMessage());
             }
+
         }
 
         public void kill() {
